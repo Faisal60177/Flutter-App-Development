@@ -17,7 +17,19 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Hello"), backgroundColor: Colors.blue),
+      body: SafeArea(
+        child: PageView(
+          onPageChanged: (pageIndex) {
+            print('Current page: $pageIndex');
+          },
+          scrollDirection: Axis.vertical,
+          children: [
+            Container(color: Colors.red),
+            Container(color: Colors.yellow),
+            Container(color: Colors.green),
+          ],
+        ),
+      ),
     );
   }
 }
