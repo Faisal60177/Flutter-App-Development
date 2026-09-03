@@ -1,6 +1,8 @@
 # 🌍 Countries of the World
 
 ![img.png](img.png)
+![img_1.png](img_1.png)
+![img_2.png](img_2.png)
 
 A clean, modern Flutter application that lists countries from around the world with live search, pull-to-refresh, and a detailed country view — built with the **BLoC** state management pattern and a clean, layered architecture.
 
