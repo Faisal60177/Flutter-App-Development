@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/models/country.dart';
+import 'package:flutter_project/screens/country_detail_screen.dart';
 
 class CountryListItem extends StatelessWidget {
   final Country country;
@@ -8,29 +10,42 @@ class CountryListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => CountryDetailScreen(country: country),
+            ),
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.1),
+                spreadRadius: 1,
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            _buildFlagImage(),
-            const SizedBox(width: 16),
-            Expanded(child: _buildCountryInfo()),
-            _buildArrowIcon(),
-          ],
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                _buildFlagImage(),
+                const SizedBox(width: 16),
+                Expanded(child: _buildCountryInfo()),
+                _buildArrowIcon(),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -53,26 +68,29 @@ class CountryListItem extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: Image.network(
-          '${country.flag}',
+        child: (country.flag == null || country.flag!.isEmpty)
+            ? _flagFallback()
+            : CachedNetworkImage(
+          imageUrl: country.flag!,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: Colors.grey[300],
-              child: Icon(Icons.flag, color: Colors.grey[600], size: 30),
-            );
-          },
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Container(
-              color: Colors.grey[200],
-              child: const Center(
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            );
-          },
+          // Cached automatically after the first load — this is
+          // what fixes flags re-downloading on every scroll/rebuild.
+          placeholder: (context, url) => Container(
+            color: Colors.grey[200],
+            child: const Center(
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+          errorWidget: (context, url, error) => _flagFallback(),
         ),
       ),
+    );
+  }
+
+  Widget _flagFallback() {
+    return Container(
+      color: Colors.grey[300],
+      child: Icon(Icons.flag, color: Colors.grey[600], size: 30),
     );
   }
 
@@ -81,7 +99,7 @@ class CountryListItem extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${country.name}',
+          country.name ?? 'Unknown Country',
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -90,7 +108,7 @@ class CountryListItem extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          '${country.capital}',
+          country.capital ?? 'N/A',
           style: TextStyle(
             fontSize: 14,
             color: Colors.blue[600],
@@ -99,7 +117,7 @@ class CountryListItem extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          '${country.shortDescription}',
+          country.shortDescription ?? '',
           style: TextStyle(fontSize: 12, color: Colors.grey[600]),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,

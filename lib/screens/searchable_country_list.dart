@@ -1,11 +1,6 @@
-import 'package:flutter_project/repositories/country_repository.dart';
 import 'package:flutter_project/blocs/country_bloc.dart';
 import 'package:flutter_project/blocs/country_event.dart';
 import 'package:flutter_project/blocs/country_state.dart';
-import 'searchable_country_list.dart';
-import 'package:flutter_project/repositories/country_repository.dart';
-import 'package:http/http.dart';
-import 'country_list_screen.dart';
 import 'package:flutter_project/models/country.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +31,7 @@ class _SearchableCountryListState extends State<SearchableCountryList> {
   }
 
   void _filterCountries() {
-    final query = _searchController.text.trim();
+    final query = _searchController.text.trim().toLowerCase();
 
     if (query.isEmpty) {
       setState(() {
@@ -45,9 +40,9 @@ class _SearchableCountryListState extends State<SearchableCountryList> {
     } else {
       setState(() {
         _filteredCountries = _allCountries.where((country) {
-          return country.name!.toLowerCase().contains(query) ||
-              country.capital!.toLowerCase().contains(query) ||
-              country.shortDescription!.toLowerCase().contains(query);
+          return (country.name ?? '').toLowerCase().contains(query) ||
+              (country.capital ?? '').toLowerCase().contains(query) ||
+              (country.shortDescription ?? '').toLowerCase().contains(query);
         }).toList();
       });
     }
@@ -62,33 +57,33 @@ class _SearchableCountryListState extends State<SearchableCountryList> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CountryBloc, CountryState>(
-      listener: (context, state) {
-        if (state is CountrySuccess) {
-          _updateCountries(state.countries);
-        }
-      },
-      child: Column(
-        children: [
-          _buildSearchBar(),
-          Expanded(
-            child: BlocBuilder<CountryBloc, CountryState>(
-              builder: (context, state) {
-                if (state is CountryLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is CountrySuccess) {
-                  return _buildCountryList();
-                } else if (state is CountryError) {
-                  return _buildErrorWidget(state.message);
-                } else {
-                  return const Center(child: Text('No countries loaded'));
-                }
-              },
-            ),
-          ),
-        ],
-      ),
-    );
+   return BlocListener<CountryBloc, CountryState>(
+       listener: (context, state){
+         if(state is CountrySuccess){
+           _updateCountries(state.countries);
+         }
+       },
+     child: Column(
+       children: [
+         _buildSearchBar(),
+         Expanded(child: BlocBuilder<CountryBloc,CountryState>
+           (builder: (context, state){
+             if(state is CountryLoading){
+               return const Center(child: CircularProgressIndicator());
+             } else if(state is CountrySuccess){
+               return _buildCountryList();
+             }else if(state is CountryError){
+               return _buildErrorWidget(state.message);
+             }else {
+               return const Center(child: Text('No countries loaded'),);
+             }
+         },
+         ),
+         ),
+       ],
+     ),
+
+       );
   }
 
   Widget _buildSearchBar() {
@@ -108,16 +103,16 @@ class _SearchableCountryListState extends State<SearchableCountryList> {
       ),
       child: TextField(
         controller: _searchController,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           hintText: 'Search countries, capitals, or descriptions...',
-          prefixIcon: const Icon(Icons.search),
+          prefixIcon: Icon(Icons.search),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding: EdgeInsets.symmetric(
             horizontal: 16.0,
             vertical: 16.0,
           ),
         ),
-      ),
+      )
     );
   }
 
@@ -145,17 +140,14 @@ class _SearchableCountryListState extends State<SearchableCountryList> {
     }
 
     return RefreshIndicator(
-      onRefresh: () async{
-        context.read<CountryBloc>().add(const RefreshCountries());
-      },
-      child: ListView.builder(
+        onRefresh: () async{
+          context.read<CountryBloc>().add(const RefreshCountries());
+        }, child: ListView.builder(
         itemCount: _filteredCountries.length,
-        itemBuilder: (context, index) {
+        itemBuilder: (context, index){
           final country = _filteredCountries[index];
           return CountryListItem(country: country);
-        },
-      ),
-    );
+        }));
   }
 
   Widget _buildErrorWidget(String message) {

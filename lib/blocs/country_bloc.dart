@@ -1,40 +1,44 @@
 import 'package:flutter_project/repositories/country_repository.dart';
 import 'country_event.dart';
 import 'country_state.dart';
-import 'package:http/http.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CountryBloc extends Bloc<CountryEvent,CountryState>{
+class CountryBloc  extends Bloc<CountryEvent, CountryState>{
+
   final CountryRepository _countryRepository;
 
   CountryBloc({required CountryRepository countryRepository}):
-        _countryRepository = countryRepository,
-        super(CountryInitial()){
+  _countryRepository = countryRepository,
+  super(CountryInitial()){
     on<FetchCountries>(_onFetchCountries);
     on<RefreshCountries>(_onRefreshCountries);
   }
+
   Future<void> _onFetchCountries(
-      FetchCountries event,
-      Emitter<CountryState> emit,
-      ) async {
+  FetchCountries event,
+  Emitter<CountryState> emit,
+
+  ) async{
     emit(CountryLoading());
-    try {
+    await _loadCountries(emit);
+
+  }
+
+  Future<void> _onRefreshCountries(
+  RefreshCountries event,
+  Emitter<CountryState> emit,
+  ) async {
+   await _loadCountries(emit);
+  }
+
+  Future<void> _loadCountries(Emitter<CountryState> emit) async {
+    try{
       final countries = await _countryRepository.getCountries();
       emit(CountrySuccess(countries));
-    } catch (e) {
+    }catch (e){
       emit(CountryError(e.toString()));
     }
   }
 
-  Future<void> _onRefreshCountries(
-      RefreshCountries event,
-      Emitter<CountryState> emit,
-      ) async {
-    try {
-      final countries = await _countryRepository.getCountries();
-      emit(CountrySuccess(countries));
-    } catch (e) {
-      emit(CountryError(e.toString()));
-    }
-  }
 }
+
