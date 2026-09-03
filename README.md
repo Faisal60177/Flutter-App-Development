@@ -1,8 +1,5 @@
 # 🌍 Countries of the World
 
-![img.png](img.png)
-![img_1.png](img_1.png)
-![img_2.png](img_2.png)
 
 A clean, modern Flutter application that lists countries from around the world with live search, pull-to-refresh, and a detailed country view — built with the **BLoC** state management pattern and a clean, layered architecture.
 
@@ -148,6 +145,11 @@ flutter run -d <device-id>
 - **Country Card** — Flag thumbnail, name, capital, truncated description, and a tap target that opens the detail screen
 - **Detail Screen** — Collapsing flag header (`SliverAppBar` + `FlexibleSpaceBar`), capital info card, full description card
 - **Empty / Error States** — Friendly icons and copy, with a **Retry** button that re-dispatches `FetchCountries`
+
+
+![img.png](img.png)
+![img_1.png](img_1.png)
+![img_2.png](img_2.png)
 
 ---
 
